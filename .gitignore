@@ -1,0 +1,7 @@
+mini_speech_commands/
+mini_speech_commands.zip
+__MACOSX/
+__pycache__/
+*.pyc
+processed_data/
+
