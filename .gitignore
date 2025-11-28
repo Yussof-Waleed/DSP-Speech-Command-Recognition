@@ -1,7 +1,47 @@
+# =============================================================================
+# DSP-Speech-Command-Recognition - .gitignore
+# =============================================================================
+
+# Dataset (auto-downloaded, ~100MB)
 mini_speech_commands/
 mini_speech_commands.zip
+
+# Mac OS artifacts
 __MACOSX/
-__pycache__/
-*.pyc
+
+# Processed data cache (can be regenerated)
 processed_data/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.tmp
