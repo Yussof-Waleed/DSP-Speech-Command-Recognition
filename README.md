@@ -189,7 +189,7 @@ X_train_frames, X_test_frames, y_train, y_test = train_test_split(
 X_train_spectrum = np.abs(np.fft.rfft(X_train_frames, axis=2)).astype(np.float32)
 X_test_spectrum  = np.abs(np.fft.rfft(X_test_frames,  axis=2)).astype(np.float32)
 # Output: (6378, 98, 201) → 98 frames × 201 frequency bins
-
+```
 
 
 ## 🛠️ Requirements
