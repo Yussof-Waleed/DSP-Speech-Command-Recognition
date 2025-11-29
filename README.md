@@ -176,6 +176,22 @@ The dataset is automatically downloaded when you run the notebook.
 
 ---
 
+## Technical Implementation Details
+
+### Train / Test Split 
+```python
+X_train_frames, X_test_frames, y_train, y_test = train_test_split(
+    frames_data, labels, test_size=0.20, random_state=42, stratify=labels
+)
+
+
+### FFT Feature Extraction 
+X_train_spectrum = np.abs(np.fft.rfft(X_train_frames, axis=2)).astype(np.float32)
+X_test_spectrum  = np.abs(np.fft.rfft(X_test_frames,  axis=2)).astype(np.float32)
+# Output: (6378, 98, 201) → 98 frames × 201 frequency bins
+```
+
+
 ## 🛠️ Requirements
 
 - Python 3.8+
