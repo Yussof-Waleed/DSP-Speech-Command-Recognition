@@ -27,7 +27,9 @@ This project implements a complete speech recognition pipeline for classifying *
 - **📊 No Deep Learning** — Pure signal processing approach
 - **🌐 Cross-Platform** — Runs on Local, Google Colab, and Kaggle
 - **💾 Smart Caching** — Preprocessed data saved for fast reloading
-- **📈 Visualizations** — Waveforms, spectrograms, and processing steps
+- **📈 Rich Visualizations** — Average waveforms, magnitude spectra, spectrograms, and comparative views
+- **🎯 Per-Class Templates** — Average frame computation for each speech command
+- **📉 Statistical Analysis** — Energy, peak magnitude, and peak frequency metrics
 - **🧹 Clean Code** — Follows SOLID, DRY, and KISS principles
 
 ---
@@ -35,22 +37,22 @@ This project implements a complete speech recognition pipeline for classifying *
 ## 🏗️ Pipeline Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        SPEECH RECOGNITION PIPELINE                       │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  ┌──────────┐    ┌──────────────┐    ┌─────────┐    ┌───────────────┐  │
-│  │  Audio   │───▶│ Preprocessing │───▶│ Framing │───▶│   Features    │  │
-│  │  Input   │    │              │    │         │    │  (Coming Soon) │  │
-│  └──────────┘    └──────────────┘    └─────────┘    └───────────────┘  │
-│       │                │                  │                 │          │
-│       ▼                ▼                  ▼                 ▼          │
-│   .wav files     • DC removal       • 25ms frames     • MFCC          │
-│   16kHz mono     • Pre-emphasis     • 10ms hop        • Energy        │
-│   1 second       • Normalization    • Hamming window  • ZCR           │
-│                  • Deduplication                                       │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                           SPEECH RECOGNITION PIPELINE                                    │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│  ┌──────────┐    ┌──────────────┐    ┌─────────┐    ┌─────────────┐    ┌─────────────┐ │
+│  │  Audio   │───▶│ Preprocessing │───▶│ Framing │───▶│   FFT &     │───▶│  Average    │ │
+│  │  Input   │    │              │    │         │    │  Spectrum   │    │  Frames     │ │
+│  └──────────┘    └──────────────┘    └─────────┘    └─────────────┘    └─────────────┘ │
+│       │                │                  │                │                 │          │
+│       ▼                ▼                  ▼                ▼                 ▼          │
+│   .wav files     • DC removal       • 25ms frames     • Magnitude       • Per-class    │
+│   16kHz mono     • Pre-emphasis     • 10ms hop          Spectrum          templates    │
+│   1 second       • Normalization    • Hamming window  • rfft()          • Waveforms    │
+│                  • Deduplication                                        • Spectrograms │
+│                                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -183,16 +185,42 @@ The dataset is automatically downloaded when you run the notebook.
 X_train_frames, X_test_frames, y_train, y_test = train_test_split(
     frames_data, labels, test_size=0.20, random_state=42, stratify=labels
 )
-
+```
 
 ### FFT Feature Extraction 
+```python
 X_train_spectrum = np.abs(np.fft.rfft(X_train_frames, axis=2)).astype(np.float32)
 X_test_spectrum  = np.abs(np.fft.rfft(X_test_frames,  axis=2)).astype(np.float32)
 # Output: (6378, 98, 201) → 98 frames × 201 frequency bins
 ```
 
+### Average Frames Computation
+```python
+# Compute average frames per class for template creation
+for class_label in unique_classes:
+    class_mask = (y_train == class_label)
+    class_frames = X_frames_train[class_mask]
+    avg_frames_per_class[idx] = np.mean(class_frames, axis=0)
+# Output: (8, 98, 400) → 8 classes × 98 frames × 400 samples per frame
+```
 
-## 🛠️ Requirements
+### Visualizations Generated
+
+| Visualization | Description |
+|--------------|-------------|
+| **Average Waveforms** | Overlap-add reconstructed waveforms from averaged frames |
+| **Magnitude Spectra** | FFT-based frequency domain representation per class |
+| **Spectrograms** | Time-frequency 2D heatmaps for each speech command |
+| **Comparative View** | Overlaid waveforms and spectra for cross-class comparison |
+
+### Summary Statistics
+For each class, the following metrics are computed:
+- **Frame Energy** — Sum of squared sample values
+- **Peak Magnitude** — Maximum spectral amplitude
+- **Peak Frequency** — Frequency bin with highest energy (Hz)
+
+
+## ️ Requirements
 
 - Python 3.8+
 - NumPy
@@ -207,8 +235,8 @@ See [`requirements.txt`](requirements.txt) for exact versions.
 
 - [x] **Stage 1:** Data Loading & Verification
 - [x] **Stage 2:** Preprocessing & Framing
-- [ ] **Stage 3:** Feature Extraction (MFCC, Energy, ZCR)
-- [ ] **Stage 4:** Template Creation (Reference patterns)
+- [x] **Stage 3:** Feature Extraction (FFT Magnitude Spectrum)
+- [x] **Stage 4:** Template Creation (Average Frames per Class)
 - [ ] **Stage 5:** Distance Metrics (DTW, Euclidean)
 - [ ] **Stage 6:** Classification & Evaluation
 - [ ] **Stage 7:** Real-time Demo
